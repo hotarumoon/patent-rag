@@ -5,7 +5,7 @@ import time
 import warnings
 warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality isn't compatible")
 
-# Import our AI Logic
+# Import the AI Logic
 from rag_engine import RagEngine
 
 # Import generated protobuf code
