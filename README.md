@@ -1,5 +1,3 @@
-# PatentChatBot Project Explanation
-
 ## 🎯 What This Project Does
 This is a **RAG (Retrieval-Augmented Generation) chatbot** that can answer questions about patent documents. Think of it as a specialized AI assistant that can read your patent files and answer questions about them—citing the exact sources.
 
