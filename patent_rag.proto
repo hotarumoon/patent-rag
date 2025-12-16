@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package patentrag;
+
+// The AI Service definition
+service PatentExpert {
+  // Sends a query to the RAG pipeline and gets an answer
+  rpc AskQuestion (QueryRequest) returns (QueryResponse) {}
+
+  // Admin function to trigger indexing of new patents
+  rpc IndexPatents (IndexRequest) returns (IndexResponse) {}
+}
+
+message QueryRequest {
+  string question = 1;
+  int32 top_k = 2; // How many patent chunks to retrieve
+}
+
+message QueryResponse {
+  string answer = 1;
+  repeated string source_documents = 2; // Citations (crucial for patents!)
+  float confidence_score = 3;
+}
+
+message IndexRequest {
+  string directory_path = 1;
+}
+
+message IndexResponse {
+  bool success = 1;
+  int32 documents_processed = 2;
+  string message = 3;
+}
