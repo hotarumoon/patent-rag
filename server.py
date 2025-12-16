@@ -11,6 +11,7 @@ from rag_engine import RagEngine
 # Import generated protobuf code
 import patent_rag_pb2
 import patent_rag_pb2_grpc
+from grpc_reflection.v1alpha import reflection
 
 class PatentExpertServicer(patent_rag_pb2_grpc.PatentExpertServicer):
     def __init__(self):
@@ -46,6 +47,13 @@ class PatentExpertServicer(patent_rag_pb2_grpc.PatentExpertServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     patent_rag_pb2_grpc.add_PatentExpertServicer_to_server(PatentExpertServicer(), server)
+
+    # Enable reflection
+    SERVICE_NAMES = (
+        patent_rag_pb2.DESCRIPTOR.services_by_name['PatentExpert'].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
 
     port = '[::]:50051'
     server.add_insecure_port(port)
