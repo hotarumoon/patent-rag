@@ -3,6 +3,26 @@ This is a **RAG (Retrieval-Augmented Generation) chatbot** that can answer quest
 
 ---
 
+## Key Takeaways from Ege:
+
+1. **RAG = Retrieval + Augmentation + Generation**
+   - Don't just send questions to an LLM
+   - First find relevant context, then ask with that context
+
+2. **Embeddings are the magic**
+   - Text → Vector allows semantic search
+   - "Similar meaning" = "nearby in vector space"
+
+3. **gRPC is great for AI services**
+   - Type-safe contracts prevent bugs
+   - Efficient binary serialization
+   - Easy to add streaming for long responses
+
+4. **Local LLMs are viable (and free so makes it even better)**
+   - Ollama makes it dead simple
+   - Privacy + cost savings + no rate limits
+
+
 ## Architecture Diagram
 
 ```
@@ -233,21 +253,3 @@ python client.py
 
 ---
 
-## Key Takeaways from Ege:
-
-1. **RAG = Retrieval + Augmentation + Generation**
-   - Don't just send questions to an LLM
-   - First find relevant context, then ask with that context
-
-2. **Embeddings are the magic**
-   - Text → Vector allows semantic search
-   - "Similar meaning" = "nearby in vector space"
-
-3. **gRPC is great for AI services**
-   - Type-safe contracts prevent bugs
-   - Efficient binary serialization
-   - Easy to add streaming for long responses
-
-4. **Local LLMs are viable (and free so makes it even better)**
-   - Ollama makes it dead simple
-   - Privacy + cost savings + no rate limits
