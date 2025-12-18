@@ -1,28 +1,28 @@
-## 🎯 What This Project Does
+## Project Summary
 This is a **RAG (Retrieval-Augmented Generation) chatbot** that can answer questions about patent documents. Think of it as a specialized AI assistant that can read your patent files and answer questions about them—citing the exact sources.
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                           CLIENT (client.py)                          │
+│                           CLIENT (client.py)                         │
 │   • Sends patent indexing requests                                   │
 │   • Sends questions to the AI                                        │
 └───────────────────────────────────┬──────────────────────────────────┘
                                     │ gRPC (Protocol Buffers)
                                     ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│                           SERVER (server.py)                          │
+│                           SERVER (server.py)                         │
 │   • Exposes gRPC endpoints                                           │
 │   • Handles concurrent requests (ThreadPoolExecutor)                 │
 └───────────────────────────────────┬──────────────────────────────────┘
                                     │
                                     ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│                       RAG ENGINE (rag_engine.py)                      │
-│                                                                       │
+│                       RAG ENGINE (rag_engine.py)                     │
+│                                                                      │
 │   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐  │
 │   │   Embeddings    │    │   Vector DB     │    │      LLM        │  │
 │   │  (HuggingFace)  │◄──►│   (ChromaDB)    │◄──►│  (Llama 3 via   │  │
@@ -33,7 +33,7 @@ This is a **RAG (Retrieval-Augmented Generation) chatbot** that can answer quest
 
 ---
 
-## 🔑 Key Files & What They Do
+## Key Files & What They Do
 
 ### 1. `patent_rag.proto` - The Contract (API Definition)
 ```protobuf
@@ -47,16 +47,21 @@ service PatentExpert {
 - **Efficient serialization**: Binary format is faster & smaller than JSON
 - **Code generation**: Auto-generates Python stubs (`patent_rag_pb2.py`, `patent_rag_pb2_grpc.py`)
 
-**Generated from this command:**
-```bash
-python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. patent_rag.proto
-```
+
+- To generate the code from the interface (patent_rag.proto), execute following (already committed but for reference):
+  ```bash
+  python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. patent_rag.proto
+  ```
+- Install dependencies:
+  ```bash
+  pip install langchain langchain-community langchain-huggingface chromadb sentence-transformers
+  ```
 
 ---
 
 ### 2. `rag_engine.py` - The Brain (RAG Pipeline)
 
-This is where the magic happens. Let's break down the RAG flow:
+This is where the magic happens. Here is the RAG flow:
 
 #### **STEP 1: Indexing (Ingestion Phase)**
 ```python
@@ -77,12 +82,12 @@ def index_documents(self, folder_path):
     )
 ```
 
-**What's happening under the hood:**
+**Detailed explanation:**
 - Each chunk of text → converted to a **768-dimensional vector** (embedding)
 - These vectors capture the **semantic meaning** of the text
 - ChromaDB stores these vectors in `./chroma_db/` (SQLite + binary files)
 
-#### **STEP 2: Querying (RAG in Action)**
+#### **STEP 2: Querying (RAG in Action-How cool is that?)**
 ```python
 def query(self, question, top_k=3):
     # R - RETRIEVAL: Find similar chunks using vector math (cosine similarity)
@@ -162,30 +167,35 @@ This is useful for **peeking inside the vector database**:
 
 ---
 
-## 🛠️ Tech Stack Summary
+## Technologies Used
 
-| Component | Technology | Why This Choice |
-|-----------|------------|-----------------|
-| **API Layer** | gRPC + Protobuf | Type-safe, fast, great for microservices |
-| **Orchestration** | LangChain | Simplifies chaining loaders→splitters→embeddings→LLM |
-| **Vector DB** | ChromaDB | Simple, embedded, good for prototypes |
-| **Embeddings** | `all-MiniLM-L6-v2` | Fast, runs locally, good quality |
-| **LLM** | Llama 3 via Ollama | **Runs locally** = privacy (important for patents!) + free |
-
----
-
-## 🔐 Privacy-First Design
-
-Notice this project runs **everything locally**:
-- 🏠 **Ollama** serves Llama 3 on your machine
-- 🏠 **HuggingFace embeddings** run locally
-- 🏠 **ChromaDB** stores vectors on disk
-
-**No data leaves your computer**—critical when dealing with confidential patent documents.
+| Component | Technology | Why?                                                                                                                   |
+|-----------|------------|------------------------------------------------------------------------------------------------------------------------|
+| **API Layer** | gRPC + Protobuf | Type-safe, fast, great for microservices with strict contracts and low latency                                         |
+| **Serialization** | Google Protobuf | Binary protocol buffer serialization for efficient communication                                                       |
+| **Orchestration** | LangChain | Simplifies chaining loaders→splitters→embeddings→LLM, abstracted behind a custom service class to avoid vendor lock-in |
+| **Vector DB** | ChromaDB | Simple, embedded, good for prototypes (production alternatives: Elasticsearch or Milvus)                               |
+| **Embeddings** | Sentence Transformers (`all-MiniLM-L6-v2`) | Fast, runs locally, good quality                                                                                       |
+| **LLM** | Llama 3 via Ollama | **Runs locally** = privacy (important for patents!) + cost efficiency + no rate limits                                 |
+| **ML Framework** | HuggingFace | For the QA model and embeddings                                                                                        |
+| **Utilities** | Python Standard Libraries | `os`, `concurrent.futures`, etc.                                                                                       |
 
 ---
 
-## 📊 The Vector Search Explained
+## Privacy-First Design
+
+In the project **everything locally**:
+- **Ollama** serves Llama 3 on local machine
+- **HuggingFace embeddings** run locally
+- **ChromaDB** stores vectors on disk
+
+**No data leaves local environment **—critical when dealing with confidential documents and need on-premise solutionss especially for enterprise use cases.
+
+(Bank experience hence the safety obsession never really leaves a person)
+
+---
+
+## The Vector Search Explained
 
 When you ask: *"How does the consensus mechanism optimize latency?"*
 
@@ -201,7 +211,7 @@ Would be retrieved for questions about "latency optimization"—even if the exac
 
 ---
 
-## 🚀 How to Run This
+## How to Run This
 
 ```bash
 # 1. Install dependencies
@@ -223,7 +233,7 @@ python client.py
 
 ---
 
-## 🎓 Key Takeaways for a Developer
+## Key Takeaways from Ege:
 
 1. **RAG = Retrieval + Augmentation + Generation**
    - Don't just send questions to an LLM
@@ -238,30 +248,6 @@ python client.py
    - Efficient binary serialization
    - Easy to add streaming for long responses
 
-4. **Local LLMs are viable**
+4. **Local LLMs are viable (and free so makes it even better)**
    - Ollama makes it dead simple
    - Privacy + cost savings + no rate limits
-
-
-# Technologies Used
-
-- **gRPC**: For high-throughput internal AI microservices with strict contracts (Protobuf) and low latency.
-- **LangChain**: For orchestration, abstracted behind a custom service class to avoid vendor lock-in.
-- **ChromaDB**: Used as the vector database (production alternatives: Elasticsearch or Milvus).
-- **Sentence Transformers**: For text embedding.
-- **HuggingFace**: For the QA model.
-- **Google Protobuf**: For protocol buffer serialization.
-- **Ollama**: For using a local Llama 3 model for privacy (because we are using patent files here) and cost efficiency.
-- **Python Standard Libraries**: Such as `os`, `concurrent.futures`, etc.
-
----
-
-- To generate the code from the interface (patent_rag.proto), execute:
-  ```bash
-  python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. patent_rag.proto
-  ```
-
-- Install dependencies:
-  ```bash
-  pip install langchain langchain-community langchain-huggingface chromadb sentence-transformers
-  ```

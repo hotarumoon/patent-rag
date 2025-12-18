@@ -1,7 +1,7 @@
 import grpc
 import patent_rag_pb2
 import patent_rag_pb2_grpc
-
+import logging
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:
@@ -19,8 +19,8 @@ def run():
         response = stub.AskQuestion(patent_rag_pb2.QueryRequest(question=question))
 
         print("-" * 30)
-        print(f"🤖 AI Answer: {response.answer}")
-        print(f"📄 Sources: {response.source_documents}")
+        print(f"AI Answer: {response.answer}")
+        print(f"Sources: {response.source_documents}")
         print("-" * 30)
 
 

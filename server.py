@@ -57,7 +57,7 @@ def serve():
 
     port = '[::]:50051'
     server.add_insecure_port(port)
-    print(f"🚀 AI Patent Server started on {port}")
+    print(f"AI Patent Server started on {port}")
     server.start()
     server.wait_for_termination()
 
